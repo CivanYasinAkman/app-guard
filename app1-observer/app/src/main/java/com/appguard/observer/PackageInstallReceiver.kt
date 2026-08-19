@@ -7,7 +7,7 @@ import android.util.Log
 
 class PackageInstallReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("PackageInstallReceiver", "TETİKLENDİ! action: ${intent.action}")
+        if (intent.action != Intent.ACTION_PACKAGE_ADDED) return
 
         val packageName = intent.data?.schemeSpecificPart ?: return
 

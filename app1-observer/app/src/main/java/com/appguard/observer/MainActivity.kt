@@ -1,7 +1,6 @@
 package com.appguard.observer
 
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,13 +14,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import com.appguard.observer.ui.theme.ObserverTheme
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
+
 
 class MainActivity : ComponentActivity() {
 
-    private val packageInstallReceiver = PackageInstallReceiver()
-
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+        val serviceIntent = Intent(this, ObserverService::class.java)
+        ContextCompat.startForegroundService(this, serviceIntent)
         enableEdgeToEdge()
         setContent {
             ObserverTheme {
@@ -30,27 +44,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-        val filter = IntentFilter().apply {
-            addAction(Intent.ACTION_PACKAGE_ADDED)
-            addAction(Intent.ACTION_PACKAGE_REMOVED)
-            addDataScheme("package")
-        }
-
-        ContextCompat.registerReceiver(
-            this,
-            packageInstallReceiver,
-            filter,
-            ContextCompat.RECEIVER_EXPORTED
-        )
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(packageInstallReceiver)
     }
 }
-
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
