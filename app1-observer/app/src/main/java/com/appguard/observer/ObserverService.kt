@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat
 
 class ObserverService : Service() {
 
-    private val packageInstallReceiver = PackageInstallReceiver()
+    private val _packageInstallReceiver = PackageInstallReceiver()
 
     companion object {
         private const val CHANNEL_ID = "observer_channel"
@@ -33,9 +33,10 @@ class ObserverService : Service() {
             addAction(Intent.ACTION_PACKAGE_REMOVED)
             addDataScheme("package")
         }
+
         ContextCompat.registerReceiver(
             this,
-            packageInstallReceiver,
+            _packageInstallReceiver,
             filter,
             ContextCompat.RECEIVER_EXPORTED
         )
@@ -63,7 +64,7 @@ class ObserverService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(packageInstallReceiver)
+        unregisterReceiver(_packageInstallReceiver)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

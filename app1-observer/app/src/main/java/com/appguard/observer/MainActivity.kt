@@ -22,16 +22,17 @@ import androidx.activity.result.contract.ActivityResultContracts
 
 class MainActivity : ComponentActivity() {
 
-    private val notificationPermissionLauncher = registerForActivityResult(
+    private val _notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED
             ) {
-                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                _notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
         val serviceIntent = Intent(this, ObserverService::class.java)
@@ -46,6 +47,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
