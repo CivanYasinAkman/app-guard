@@ -5,15 +5,8 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
+import com.appguard.observer.model.AppInfo
 import java.security.MessageDigest
-
-data class AppInfo(
-    val packageName: String,
-    val appName: String,
-    val versionName: String?,
-    val installerSource: String?,
-    val signatureHash: String?
-)
 
 class AppInfoExtractor(private val context: Context) {
 
@@ -25,12 +18,15 @@ class AppInfoExtractor(private val context: Context) {
                 packageManager.getApplicationLabel(it).toString()
             } ?: packageName
 
+            val signatureBytes = getSignatureBytes(packageInfo)
+
             AppInfo(
                 packageName = packageName,
                 appName = appLabel,
                 versionName = packageInfo.versionName,
                 installerSource = getInstallerSource(packageManager, packageName),
-                signatureHash = getSignatureHash(packageInfo)
+                signatureHashSha256 = signatureBytes?.let { hashBytes(it, "SHA-256") },
+                signatureHashMd5 = signatureBytes?.let { hashBytes(it, "MD5") }
             )
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e("AppInfoExtractor", "Paket bulunamadi: $packageName", e)
@@ -60,22 +56,28 @@ class AppInfoExtractor(private val context: Context) {
         }
     }
 
-    private fun getSignatureHash(packageInfo: PackageInfo): String? {
+    private fun getSignatureBytes(packageInfo: PackageInfo): ByteArray? {
         val signature = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val signingInfo = packageInfo.signingInfo ?: return null
+
             val signatures = if (signingInfo.hasMultipleSigners()) {
                 signingInfo.apkContentsSigners
             } else {
                 signingInfo.signingCertificateHistory
             }
+
             signatures.firstOrNull()
         } else {
             @Suppress("DEPRECATION")
             packageInfo.signatures?.firstOrNull()
         } ?: return null
 
-        val digest = MessageDigest.getInstance("SHA-256")
-        val hashBytes = digest.digest(signature.toByteArray())
+        return signature.toByteArray()
+    }
+
+    private fun hashBytes(bytes: ByteArray, algorithm: String): String {
+        val digest = MessageDigest.getInstance(algorithm)
+        val hashBytes = digest.digest(bytes)
         return hashBytes.joinToString("") { "%02x".format(it) }
     }
 }
