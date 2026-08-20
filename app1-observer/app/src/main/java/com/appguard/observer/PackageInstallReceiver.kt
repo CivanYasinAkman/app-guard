@@ -18,6 +18,18 @@ class PackageInstallReceiver : BroadcastReceiver() {
             return
         }
 
-        Log.d("PackageInstallReceiver", "Yeni uygulama kuruldu: $packageName")
+        val extractor = AppInfoExtractor(context)
+        val appInfo = extractor.extract(packageName)
+
+        if (appInfo != null) {
+            Log.d("PackageInstallReceiver", "Yeni uygulama kuruldu: ${appInfo.appName}")
+            Log.d("PackageInstallReceiver", "Paket adi: ${appInfo.packageName}")
+            Log.d("PackageInstallReceiver", "Versiyon: ${appInfo.versionName}")
+            Log.d("PackageInstallReceiver", "Kaynak: ${appInfo.installerSource}")
+            Log.d("PackageInstallReceiver", "Imza Hash (SHA-256): ${appInfo.signatureHashSha256}")
+            Log.d("PackageInstallReceiver", "Imza Hash (MD5): ${appInfo.signatureHashMd5}")
+        } else {
+            Log.e("PackageInstallReceiver", "Uygulama bilgisi cikarilamadi: $packageName")
+        }
     }
 }
