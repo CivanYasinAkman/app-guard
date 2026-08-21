@@ -9,10 +9,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <permission
-        android:name="com.appguard.permission.RECEIVE_APP_DATA"
-        android:protectionLevel="signature" />
-
     <uses-permission android:name="com.appguard.permission.RECEIVE_APP_DATA" />
 
     <application

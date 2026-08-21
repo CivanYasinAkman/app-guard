@@ -8,7 +8,7 @@ object IpcSender {
 
     private const val ACTION_APP_DATA = "com.appguard.ACTION_APP_DATA"
     private const val TARGET_PACKAGE = "com.appguard.guard"
-    private const val PERMISSION = "com.appguard.permission.RECEIVE_APP_DATA"
+
 
     const val EXTRA_PACKAGE_NAME = "extra_package_name"
     const val EXTRA_APP_NAME = "extra_app_name"
@@ -19,7 +19,7 @@ object IpcSender {
 
     fun send(context: Context, appInfo: AppInfo) {
         val intent = Intent(ACTION_APP_DATA).apply {
-            setPackage(TARGET_PACKAGE)
+            setClassName(TARGET_PACKAGE, "$TARGET_PACKAGE.DataReceiver")
             putExtra(EXTRA_PACKAGE_NAME, appInfo.packageName)
             putExtra(EXTRA_APP_NAME, appInfo.appName)
             putExtra(EXTRA_VERSION_NAME, appInfo.versionName)
@@ -27,6 +27,6 @@ object IpcSender {
             putExtra(EXTRA_SHA256, appInfo.signatureHashSha256)
             putExtra(EXTRA_MD5, appInfo.signatureHashMd5)
         }
-        context.sendBroadcast(intent, PERMISSION)
+        context.sendBroadcast(intent)
     }
 }
