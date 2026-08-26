@@ -18,15 +18,20 @@ object IpcSender {
     const val EXTRA_MD5 = "extra_md5"
 
     fun send(context: Context, appInfo: AppInfo) {
+        val dataToSign = "${appInfo.packageName}|${appInfo.signatureHashSha256}"
+        val signature = HmacUtil.sign(dataToSign, IpcSecret.KEY)
+
         val intent = Intent(ACTION_APP_DATA).apply {
-            setClassName(TARGET_PACKAGE, "$TARGET_PACKAGE.DataReceiver")
+            setPackage(TARGET_PACKAGE)
             putExtra(EXTRA_PACKAGE_NAME, appInfo.packageName)
             putExtra(EXTRA_APP_NAME, appInfo.appName)
             putExtra(EXTRA_VERSION_NAME, appInfo.versionName)
             putExtra(EXTRA_INSTALLER_SOURCE, appInfo.installerSource)
             putExtra(EXTRA_SHA256, appInfo.signatureHashSha256)
             putExtra(EXTRA_MD5, appInfo.signatureHashMd5)
+            putExtra("extra_signature", signature)
         }
+        // PERMISSION parametresi kaldırıldı, sadece intent gönderiliyor
         context.sendBroadcast(intent)
     }
 }
